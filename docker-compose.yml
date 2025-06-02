@@ -1,0 +1,92 @@
+services:
+  netprobe:
+    container_name: netprobe
+    build:
+      context: .
+      dockerfile: Dockerfile
+    network_mode: "host"
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - INTERFACE=enp2s0
+      - TIMEOUT=-1
+      - DB_HOST=127.0.0.1
+      - DB_PORT=3306
+      - DB_USER=netprobe
+      - DB_PASSWORD=netprobe
+      - DB_NAME=netprobe_db
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: ["/bin/sh", "-c", "./build/netprobe"]
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana_data/grafana-storage:/var/lib/grafana # sudo chown -R 472:472 ./grafana_data/grafana-storage
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      mysql:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: netprobePassword
+      MYSQL_DATABASE: netprobe_db
+      MYSQL_USER: netprobe
+      MYSQL_PASSWORD: netprobe
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+  active:
+    build:
+      context: ./active
+      dockerfile: Dockerfile
+    container_name: active
+    working_dir: /app
+    volumes:
+      - ./active:/app
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_HOST=127.0.0.1
+      - DB_PORT=3306
+      - DB_USER=netprobe
+      - DB_PASSWORD=netprobe
+      - DB_NAME=netprobe_db
+    depends_on:
+      - mysql
+    network_mode: "host"
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    privileged: true
+    entrypoint: ["/entrypoint.sh"]
+
+  # adminer:
+  #     image: adminer
+  #     restart: always
+  #     ports:
+  #       - 8080:8080
+
+volumes:
+  mysql-data:

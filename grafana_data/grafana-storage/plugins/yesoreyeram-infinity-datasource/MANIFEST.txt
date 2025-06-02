@@ -1,0 +1,44 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "grafana",
+  "signedByOrg": "grafana",
+  "signedByOrgName": "Grafana Labs",
+  "plugin": "yesoreyeram-infinity-datasource",
+  "version": "3.3.0",
+  "time": 1748863214310,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "img/icon.svg": "e498b00e1cc3c9e8b65a2b8320b7d170c6da61d424fe5f3f3fdf9963204449ae",
+    "img/slide-variables.png": "8ed0cd7b1ac00bd2c7fa6e72c513b678c39ba7d63030f06e8695cb1d352e3b34",
+    "img/homepage-bg.svg": "97ec32b2c542bcb63b7fa7659e42a876a5b9ec00aef7a486f2dc41b83d7d9eb8",
+    "img/slide-features.png": "58aba3b2f2d73ee99945cba9746463f0039d8afb5366ed8d42db62145b914d0f",
+    "img/aws.jpg": "e682ccc794708fd3eb32a3fb5e2bcccd8ff3b54f30eba2086fd1b28a82020d81",
+    "img/slide-series.png": "f7d523c39f9d4567974c37432f047e4e8944cb92dc2c9a4424757ce5e54dc3a7",
+    "img/oauth-2-sm.png": "9945bb307d5545369d50381acc97d48b4a98433831f14e99eb839f0970a91258",
+    "img/slide-rest-api.png": "cf72349768e0ccf19a856d86e97c8e67dcdadfcee49e73ae5acbe781c3ae0c79",
+    "CHANGELOG.md": "a07f7f9bda83c635a4886f73824d77c7e0566bae9223c4306f998c35177aa365",
+    "gpx_infinity_linux_amd64": "9fbf487b4fa2869ba9720a55ff39003c206eabf02d77576180f46a449209a290",
+    "README.md": "351dea529ec76dc9b396ef8f29d4ec36cab5ace16040f42142f0c58427ee3a7d",
+    "go_plugin_build_manifest": "b28c2990022533740952b84ed3abb2e3606c836060bab9fe16303e3c58ef058f",
+    "module.js.map": "8889a603ccdcdfcad3de39e07b63668ada28d191023fd622af57f0c5abddc2b5",
+    "module.js.LICENSE.txt": "99c2a3e174dd5e46ac78787c5d7965079f788f7edf923e0868a3505826b0e34d",
+    "LICENSE": "85fb2c20b586ef9dc00ee5c41140e1cd59fdded9a0b24a9054b04e9f0f6b2977",
+    "module.js": "d8a3c3f4d2b61813b8a1c5671d1fffd67cc693b469b41a2a58b9525db7d83e02",
+    "plugin.json": "04b85f266693d8f0de7856b79b290579cc6a3260dab7d560b442d202e457f8e0"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.11
+Comment: https://openpgpjs.org
+
+wrkEARMKAAYFAmg9iO4AIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
+cIhm5171AgkByLLr5x/AMHEm8qrf8Pq9PD/W3jz44mtE3UYcjI1ktB7mdUat
+ot0rP18hSsx57vkP3WTl8wPXEyaGEJIG0CCdDd4CCQFWG9qMIPyas/9pFyFN
+i/79vWUysJNjKI31sIB4je69o9iHO1gaOnYAemsA8CMHPMEVefQVkS9g6YhC
+FafvgybQUw==
+=k/oz
+-----END PGP SIGNATURE-----

@@ -1,0 +1,7 @@
+build/
+docs/html
+docs/latex
+.vscode/
+latex/
+Output/
+sortie

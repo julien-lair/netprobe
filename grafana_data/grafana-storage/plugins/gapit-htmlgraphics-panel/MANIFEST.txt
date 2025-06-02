@@ -1,0 +1,51 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "community",
+  "signedByOrg": "gapit",
+  "signedByOrgName": "gapit",
+  "plugin": "gapit-htmlgraphics-panel",
+  "version": "2.1.1",
+  "time": 1660210636654,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "CHANGELOG.md": "ac58cfebc150b8fc96cc4120cf3b2be11b0dee0de198d56d5713c68c0c7aab92",
+    "module.js.map": "6ce0bd1dbeaa9c56771daa308cd2e6929380265ba5181a434f4283d8073dc3d1",
+    "LICENSE": "e67fa6fe471b9a3309cd463847190389590b6ebb9d1ec702cb5badb4b4b919c0",
+    "module.js": "9ee5c67b4f440686648256176ddbe7f863e31d8bb4ef1dfb49ea87ebf997ae65",
+    "img/screenshot-simple-example.png": "8cf7bb666a7a58d44b80bc9e16dad07ce190d6605a624ea7d62b2c17863f082e",
+    "img/screenshot-code-editor.png": "26efc5d7e2529185e3db812a174f13e967665c33959ef93c52084036e05e1c0e",
+    "img/logo.svg": "fd1b6ac34f5179027ae0ea7eb7fe58d5c91187db2adf5c43bc49ef1e68c48858",
+    "img/screenshot-overflow.png": "d9da7d81b892b3f5493677dd71ec7bea07d99da18f2b02dd02dcfee7751e8fa8",
+    "img/screenshot-open-sans-font-weights.png": "813f98873400c767b8f46142a17ce0f26c4aa2c757f8268f604ea15241956ced",
+    "img/screenshot-building-overview-edit.png": "f03eff7b9e8a6a80113cb8098422bb78ed7dcaa46458e42733093006c7ce49ac",
+    "img/screenshot-building-overview.png": "7da0b48c50f9c13d8ef7d6603ab712ad7fd1ebf0269b9a324ff2417e78f3269f",
+    "img/screenshot-edit-mode.png": "adfc7cf13d9291d2d932f3f0025895d38e7350fce192c64e2d2e16c8dec94eb1",
+    "img/screenshot-react-radar-example.png": "937742d16b16604c6590f091ab08a087c49cfc573d49bc09384b56fc61f9e949",
+    "module.js.LICENSE.txt": "cdf963ced7d25a0f98901a547647b4d6e2dbe0197fd78c87a059a87b0e542fe2",
+    "fonts/403af3bc2c6126fb5cef.woff2": "408fe165dff48eb2f8cb3a2fcbc1dd92b94d56b4ab11813be55c776871c691cf",
+    "fonts/1f45c30d2fb99f9a22fd.woff2": "c42014995e3763f5fd8d42a07ddc4f2d12486017484f2324f3e6afb46029df82",
+    "fonts/e24264613d8bf484c0aa.woff2": "7a32484e166e1337fbb0cf4f4262bb385ed9081f1ac20f9efe39e8e50490367a",
+    "fonts/b87be75f5095e2b4ffe9.woff2": "46b518780343f2262e168bea5146d1ff30a6253191cc61b486657c76a58fb2bb",
+    "plugin.json": "70416c96b5d40fcce8b9789033cc9f5e5dae993b07a2fd7ddeaa137c1f7ab1b1",
+    "declarations/1e2aea9e896517516cd6.d.ts": "c077e4c45b0348048466bd5120b20c2c675283ef6cc34cf9d2db2d6c970622a0",
+    "declarations/3ecb755f0ddd916b83f2.d.ts": "15f21813526d498454301c8ecd707e3948a9e95f8940cd2179f81926336f6378",
+    "declarations/bd1ee11311ca67e59622.d.ts": "9fb6b194b9b8266f8f6237cb35883a03ec905c14250816c0d666e9dfb0371ab9",
+    "declarations/c84c03169c83582b8d39.d.ts": "290966606e467acd0e00c87f2be1f5016a495ceb261b040e1a41f9522fbf8abf",
+    "README.md": "104e80a7ebf8fccec587827d46e701aadb35e45f9a3076e5164655b426202695"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.10
+Comment: https://openpgpjs.org
+
+wrkEARMKAAYFAmL0zcwAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
+cIhm590kAgkBDv9PeNQz91o/zL/mIUfjp9xkkrKsWpch9IwtymlABkQ1r9YS
+fJcx5M0VTE9JJyh8MI0N0eluVReTAfDWk3c9sogCCQHqFZaAfw0yIC3OV2G1
+4FWhFBtywwa3/9cikAyq4UObMsGy9NePmpT9A6dByFlVxPDlDDeoZCq6Z4nI
+KaHDT4toTw==
+=Qpya
+-----END PGP SIGNATURE-----
