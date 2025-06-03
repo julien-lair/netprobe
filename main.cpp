@@ -41,7 +41,7 @@ int main() {
     //si programme lancée depuis le docker : /netprobe/build/manuf
 
     // Get the network interface from environment variable
-    const char* interfaceEnv = "enp2s0";//getenv("INTERFACE");
+    const char* interfaceEnv = getenv("INTERFACE");
     if (!interfaceEnv) {
         std::cerr << "Error: INTERFACE environment variable is not set." << std::endl;
         return 1;
@@ -53,7 +53,7 @@ int main() {
     // Atomic flag for the infinite loop to dump hosts
     std::atomic<bool> dumpHosts(false);
     // Get the timeout duration from environment variable
-    const char* durationEnv = "-1";//getenv("TIMEOUT");
+    const char* durationEnv = getenv("TIMEOUT");
     if (!durationEnv) {
         std::cerr << "Error: TIMEOUT environment variable is not set." << std::endl;
         return 1;

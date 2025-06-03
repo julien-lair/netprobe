@@ -54,7 +54,7 @@ Le projet est composé de plusieurs conteneurs Docker :
 
 Installation du resolver OID pour SNMP :
 ```bash
-sudo apt-install snmp-mibs-downloader
+sudo apt install snmp-mibs-downloader
 sudo sed -i 's/^mibs/#mibs/' /etc/snmp/snmp.conf
 sudo download-mibs
 ```
@@ -75,7 +75,7 @@ sudo chown -R 472:472 ./grafana_data/grafana-storage
 
 3. Construction et lancement des conteneurs :
 ```bash
-sudo docker-compose up --build
+sudo docker compose up --build
 ```
 
 Cette commande va :
@@ -90,6 +90,9 @@ Cette commande va :
 - **Grafana** : http://localhost:3000
   - Utilisateur : admin
   - Mot de passe : netprobe
+
+  Aller dans Dashboard > Netprobe
+  
 
 ### Commandes utiles
 
