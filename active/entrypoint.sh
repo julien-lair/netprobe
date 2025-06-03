@@ -2,11 +2,17 @@
 
 set -e
 
+# Nettoyer le fichier de PID D-Bus s’il est orphelin
+if [ -f /run/dbus/pid ] && ! pgrep -x "dbus-daemon" > /dev/null; then
+    echo "Fichier PID D-Bus présent sans processus, suppression..."
+    rm -f /run/dbus/pid
+fi
+
 # Démarrer D-Bus
 mkdir -p /var/run/dbus
 dbus-daemon --system --fork
 
-# Attendre que D-Bus soit prêt (optionnel mais utile)
+# Attendre que D-Bus soit prêt
 sleep 1
 
 # Démarrer Avahi

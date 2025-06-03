@@ -92,7 +92,27 @@ Cette commande va :
   - Mot de passe : netprobe
 
   Aller dans Dashboard > Netprobe
-  
+
+  #### 1 - Fonctionnement général
+  Grafana permet de visualiser les informations récupérées depuis la cartographie.
+<br>Vous pouvez rechercher des appareils en fonction de leur IP, MAC ou protocoles : pour cela, entrez les informations de votre appareil en haut de la page.
+<br>Vous devez actualiser la page avec le bouton "Refresh" (en haut à droite) pour voir les nouveaux appareils détectés.
+
+  #### 2 - Partie Passive
+  ![alt text](docs/grafana1.png)
+  Voici un aperçu de la page de cartographie passive. Vous y trouverez des statistiques ainsi qu’un tableau listant tous les appareils détectés et leurs informations (MAC, IP, Hostname, OS, fournisseur, protocoles utilisés).
+<br><br>**En cliquant** sur Start Active Scan, vous serez redirigé vers la partie active.
+<br><br>**En cliquant** sur une adresse MAC, vous pourrez visualiser plus en détail les <u>informations échangées dans les protocoles</u>, ainsi qu’un <u>graphe</u> illustrant les relations entre l’appareil sélectionné et ses voisins.
+
+  #### 3 - Partie Active
+  Dans cette section, vous pouvez lancer différents types de scans :
+
+- **ARP :** les IP inconnues détectées par la partie passive peuvent être interrogées.
+- **mDNS :** lancez un scan mDNS pour découvrir les appareils de votre réseau (caméras, imprimantes, services SSH, etc.).
+- **SNMP** (IP unique ou /24) : lancez un scan SNMP sur une IP précise ou une plage en /24 pour obtenir des informations sur les appareils.
+- **SNMP** (scan réseau) : vous pouvez également scanner l’ensemble du réseau pour détecter les ports 161 (SNMP) ouverts.
+- **HTTP(S) :** scannez une IP ou une plage en /24 pour trouver les ports web ouverts ; un aperçu des URL vous affichera les informations collectées.
+- **SSH :** scannez une IP ou une plage en /24 pour découvrir les ports 22 ouverts.
 
 ### Commandes utiles
 
