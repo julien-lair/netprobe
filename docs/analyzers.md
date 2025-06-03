@@ -1,161 +1,134 @@
-# Adding a New Analyzer to the Codebase
+# Guide des analyseurs de protocoles
 
-To add a new analyzer to the NetProbe codebase, follow these steps:
+## Vue d'ensemble
 
-## 1. Create the Layer
+Les analyseurs sont des composants clés de NetProbe qui traitent les paquets réseau pour en extraire des informations pertinentes. Chaque analyseur est spécialisé dans un protocole spécifique.
 
-The Layer class is responsible for parsing and representing the protocol data from the network packets. Create a new layer class in the appropriate directory under `Layers/`. For example, if you are adding support for a new protocol called XYZ, create `XYZLayer.hpp` and `XYZLayer.cpp`.
+## Architecture des analyseurs
 
-### Example: `Layers/XYZ/XYZLayer.hpp`
+### Classe de base Analyzer
 
-```hpp
-#ifndef XYZ_LAYER_HPP
-#define XYZ_LAYER_HPP
+Tous les analyseurs héritent de la classe de base `Analyzer` :
 
-#include <string>
-#include <vector>
-#include <cstdint>
-#include <ostream>
+```cpp
+class Analyzer {
+protected:
+    HostManager& hostManager;
 
-class XYZLayer {
 public:
-	XYZLayer(const uint8_t* data, size_t length);
-	// Add methods to parse and access XYZ protocol data
-private:
-	const uint8_t* rawData;
-	size_t rawDataLength;
-	// Add members to store parsed XYZ data
-	void parseXYZDU();
-};
-
-#endif // XYZ_LAYER_HPP
-```
-
-### Example: `Layers/XYZ/XYZLayer.cpp`
-
-```cpp
-#include "XYZLayer.hpp"
-
-XYZLayer::XYZLayer(const uint8_t* data, size_t length)
-  : rawData(data), rawDataLength(length) {
-	parseXYZDU();
-}
-
-void XYZLayer::parseXYZDU() {
-	// Implement parsing logic for XYZ protocol
-}
-```
-
-## 2. Create the Protocol Data Structure
-
-The ProtocolData structure stores the parsed data for the new protocol. Create a new struct in `Hosts/ProtocolData.hpp`.
-
-### Example: `Hosts/ProtocolData.hpp`
-
-```hpp
-struct XYZData : public ProtocolData {
-	// Add fields to store XYZ protocol data
-	XYZData(timespec ts, /* other parameters */)
-		: ProtocolData(ProtocolType::XYZ, ts) {
-		// Initialize fields
-	}
+    Analyzer(HostManager& manager) : hostManager(manager) {}
+    virtual ~Analyzer() {}
+    virtual void analyzePacket(pcpp::Packet& packet) = 0;
 };
 ```
 
-## 3. Update the Host Class
+## Analyseurs disponibles
 
-The Host class manages the protocol data for each host. Update the `Host` class to handle the new protocol.
+### 1. DHCP Analyzer
+- **Fichier** : `Analyzers/DHCP/DHCPAnalyzer.hpp`
+- **Fonction** : Détection des clients et serveurs DHCP
+- **Informations collectées** :
+  - Adresses IP attribuées
+  - Durée des baux
+  - Options DHCP (nom d'hôte, domaine, etc.)
 
-### Example: `Hosts/Host.hpp`
+### 2. mDNS Analyzer
+- **Fichier** : `Analyzers/mDNS/mDNSAnalyzer.hpp`
+- **Fonction** : Découverte des services multicast DNS
+- **Informations collectées** :
+  - Noms d'hôtes
+  - Services annoncés
+  - Adresses IP locales
 
-```hpp
-class Host {
-public:
-	Json::Value toJson() const {
-		// Add logic to convert XYZData to JSON
-		if (protocol_data->protocol == ProtocolType::XYZ) {
-			XYZData* xyz_data = static_cast<XYZData*>(protocol_data);
-			Json::Value xyzJson;
-			// Populate xyzJson with XYZData fields
-			protocolsJson["XYZ"].append(xyzJson);
-		}
-	}
-};
-```
+### 3. ARP Analyzer
+- **Fichier** : `Analyzers/ARP/ARPAnalyzer.hpp`
+- **Fonction** : Analyse du protocole ARP
+- **Informations collectées** :
+  - Correspondances MAC/IP
+  - Détection des conflits ARP
+  - Identification des passerelles
 
-## 4. Create the Analyzer
+### 4. STP Analyzer
+- **Fichier** : `Analyzers/STP/STPAnalyzer.hpp`
+- **Fonction** : Analyse du Spanning Tree Protocol
+- **Informations collectées** :
+  - Topologie des switches
+  - Root bridges
+  - Ports bloqués/forwarding
 
-The Analyzer class processes the packets and extracts the protocol data. Create a new analyzer class in the appropriate directory under `Analyzers/`.
+### 5. SSDP Analyzer
+- **Fichier** : `Analyzers/SSDP/SSDPAnalyzer.hpp`
+- **Fonction** : Découverte des services UPnP
+- **Informations collectées** :
+  - Types de périphériques
+  - Services disponibles
+  - URLs des descriptions
 
-### Example: `Analyzers/XYZ/XYZAnalyzer.hpp`
+### 6. CDP Analyzer
+- **Fichier** : `Analyzers/CDP/CDPAnalyzer.hpp`
+- **Fonction** : Analyse du Cisco Discovery Protocol
+- **Informations collectées** :
+  - Modèles d'équipements Cisco
+  - Versions IOS
+  - Informations de VLAN
 
-```hpp
-#ifndef XYZ_ANALYZER_HPP
-#define XYZ_ANALYZER_HPP
+### 7. LLDP Analyzer
+- **Fichier** : `Analyzers/LLDP/LLDPAnalyzer.hpp`
+- **Fonction** : Analyse du Link Layer Discovery Protocol
+- **Informations collectées** :
+  - Capacités des équipements
+  - Informations de port
+  - Management addresses
 
-#include "../Analyzer.hpp"
-#include "../../Layers/XYZ/XYZLayer.hpp"
+### 8. WOL Analyzer
+- **Fichier** : `Analyzers/WOL/WOLAnalyzer.hpp`
+- **Fonction** : Détection des paquets Wake-on-LAN
+- **Informations collectées** :
+  - MAC addresses cibles
+  - Sources des requêtes
 
-class XYZAnalyzer : public Analyzer {
-public:
-	XYZAnalyzer(HostManager& hostManager) : Analyzer(hostManager) {}
-	void analyzePacket(pcpp::Packet& parsedPacket) override;
-};
+### 9. ICMP Analyzer
+- **Fichier** : `Analyzers/ICMP/ICMPAnalyzer.hpp`
+- **Fonction** : Analyse des paquets ICMP
+- **Informations collectées** :
+  - Types de messages ICMP
+  - Latence réseau
+  - Traceroutes
 
-#endif // XYZ_ANALYZER_HPP
-```
+### 10. SNMP Analyzer
+- **Fichier** : `Analyzers/SNMP/SNMPAnalyzer.hpp`
+- **Fonction** : Analyse du Simple Network Management Protocol
+- **Informations collectées** :
+  - OIDs interrogés
+  - Versions SNMP
+  - Communautés utilisées
 
-### Example: `Analyzers/XYZ/XYZAnalyzer.cpp`
+## Ajout d'un nouvel analyseur
 
-```cpp
-#include "XYZAnalyzer.hpp"
+1. **Création du fichier**
+   ```bash
+   mkdir -p Analyzers/NewProtocol
+   touch Analyzers/NewProtocol/NewProtocolAnalyzer.hpp
+   ```
 
-void XYZAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
-	// Extract XYZ layer from the packet
-	XYZLayer xyzLayer(parsedPacket.getRawData(), parsedPacket.getRawDataLen());
-	// Create XYZData object
-	auto xyzData = std::make_unique<XYZData>(/* parameters */);
-	// Update the host manager with the XYZ data
-	hostManager.updateHost(ProtocolType::XYZ, std::move(xyzData));
-}
-```
+2. **Structure de base**
+   ```cpp
+   class NewProtocolAnalyzer : public Analyzer {
+   public:
+       NewProtocolAnalyzer(HostManager& manager) : Analyzer(manager) {}
+       void analyzePacket(pcpp::Packet& packet) override {
+           // Implémentation de l'analyse
+       }
+   };
+   ```
 
-## 5. Update the Host Manager
+3. **Intégration**
+   - Ajouter l'include dans main.cpp
+   - Créer une instance dans main()
+   - Ajouter l'analyseur au CaptureManager
 
-The HostManager class updates the host information with the new protocol data. Update the `updateHost` method to handle the new protocol.
-
-### Example: `Hosts/HostManager.cpp`
-
-```cpp
-void HostManager::updateHost(ProtocolType protocol, std::unique_ptr<ProtocolData> data) {
-	switch (protocol) {
-		case ProtocolType::XYZ: {
-			XYZData* xyzData = dynamic_cast<XYZData*>(data.get());
-			if (xyzData) {
-				processHost(xyzData->senderMAC, xyzData->senderIP, "", ProtocolType::XYZ);
-			}
-			break;
-		}
-		// Handle other protocols
-	}
-}
-```
-
-## 6. Register the Analyzer
-
-Finally, register the new analyzer in the main application.
-
-### Example: `main.cpp`
-
-```cpp
-int main() {
-	// Create an instance of the new analyzer
-	XYZAnalyzer xyzAnalyzer(hostManager);
-	// Add the new analyzer to the capture manager
-	captureManager.addAnalyzer(&xyzAnalyzer);
-	// Start capturing packets
-	captureManager.startCapture();
-}
-```
-
-By following these steps, you can add support for a new protocol to the NetProbe application.
+4. **Bonnes pratiques**
+   - Vérifier la validité des paquets
+   - Gérer les erreurs proprement
+   - Documenter le code
+   - Ajouter des tests unitaires

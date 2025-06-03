@@ -1,4 +1,102 @@
-# Process of the Application
+# Processus de fonctionnement de NetProbe
+
+## Initialisation
+
+1. **Chargement de la base de données des vendeurs**
+   ```cpp
+   loadVendorDatabase("/netprobe/build/manuf", vendorDatabase);
+   ```
+   - Charge la base de données MAC/Vendeur pour l'identification des équipements
+
+2. **Configuration de l'interface**
+   - Récupération de l'interface réseau depuis les variables d'environnement
+   - Initialisation du périphérique de capture avec PcapPlusPlus
+
+3. **Initialisation des composants**
+   - Création du HostManager pour la gestion des hôtes
+   - Configuration des gestionnaires de signaux (SIGUSR1, SIGINT, SIGTERM)
+   - Initialisation des analyseurs de protocoles
+
+## Capture et analyse
+
+### Module Passif
+
+1. **Capture des paquets**
+   - Le CaptureManager démarre la capture sur l'interface spécifiée
+   - Utilisation de callbacks PcapPlusPlus pour la réception des paquets
+
+2. **Distribution des paquets**
+   ```cpp
+   void handlePacket(pcpp::RawPacket *rawPacket) {
+       pcpp::Packet parsedPacket(rawPacket);
+       for (Analyzer* analyzer : analyzers) {
+           analyzer->analyzePacket(parsedPacket);
+       }
+   }
+   ```
+   - Chaque paquet est parsé et envoyé à tous les analyseurs enregistrés
+
+3. **Analyse des protocoles**
+   - Chaque analyseur traite les paquets correspondant à son protocole
+   - Extraction des informations pertinentes :
+     - Adresses MAC et IP
+     - Noms d'hôtes
+     - Services
+     - Informations de topologie
+
+4. **Mise à jour des informations**
+   - Le HostManager met à jour la base de données avec les nouvelles informations
+   - Les données sont stockées dans MySQL pour persistance
+
+### Module Actif
+
+1. **Scan réseau**
+   - Scan périodique des sous-réseaux découverts
+   - Détection des ports ouverts
+   - Identification des services
+
+2. **Requêtes SNMP**
+   - Interrogation des équipements supportant SNMP
+   - Récupération des informations système
+   - Collecte des données de performance
+
+## Stockage et visualisation
+
+1. **Base de données**
+   - Structure relationnelle pour stocker :
+     - Informations des hôtes
+     - Relations entre équipements
+     - Historique des découvertes
+     - Métriques de performance
+
+2. **Grafana**
+   - Tableaux de bord personnalisés
+   - Visualisation de la topologie
+   - Graphiques d'évolution
+   - Alertes configurables
+
+## Gestion des événements
+
+1. **Signaux système**
+   - SIGUSR1 : Déclenche l'export des données
+   - SIGINT/SIGTERM : Arrêt propre du programme
+
+2. **Erreurs et exceptions**
+   - Gestion des erreurs de capture
+   - Récupération des exceptions
+   - Logs détaillés
+
+## Optimisations
+
+1. **Performance**
+   - Utilisation de threads pour la capture
+   - Gestion asynchrone des signaux
+   - Optimisation des requêtes SQL
+
+2. **Ressources**
+   - Limitation de la mémoire utilisée
+   - Gestion efficace des connexions à la base de données
+   - Nettoyage périodique des données obsolètes
 
 ## Components
 

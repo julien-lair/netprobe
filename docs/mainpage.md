@@ -1,41 +1,83 @@
-# Main Page
+# NetProbe - Documentation Technique
 
-## NetProbe
+## Vue d'ensemble
 
-**NetProbe** is a network mapping application designed to passively capture and analyze network traffic. The application utilizes various protocol analyzers to gather information about devices and their interactions on the network.
+NetProbe est une solution de cartographie réseau qui combine deux approches :
+- Une cartographie passive basée sur l'analyse de paquets réseau
+- Une cartographie active utilisant des scans et requêtes SNMP
 
-### Features
+## Architecture du système
 
-- **Packet Capture**: Captures network packets using the PcapPlusPlus library.
-- **Protocol Analysis**: Supports analysis for multiple protocols including ARP, DHCP, STP, and more.
-- **Host Management**: Maintains a database of hosts and updates their information based on captured packets.
-- **Signal Handling**: Dumps host information to a file upon receiving specific signals.
+### Module Passif (C++)
 
-### Components
+Le module passif est composé de plusieurs composants clés :
 
-- **CaptureManager**: Manages packet capture and distribution to analyzers.
-- **Analyzers**: Abstract base class for analyzing network packets. Derived classes implement specific protocol analysis.
-- **HostManager**: Manages host information and updates the JSON representation of hosts.
+1. **CaptureManager** (`CaptureManager.hpp`)
+   - Gère la capture de paquets sur une interface réseau
+   - Distribue les paquets capturés aux différents analyseurs
+   - Utilise la bibliothèque PcapPlusPlus pour la capture
 
-### Getting Started
+2. **Analyseurs** (`Analyzers/`)
+   - Protocoles supportés :
+     - DHCP : Découverte des clients et serveurs DHCP
+     - mDNS : Service discovery et noms d'hôtes
+     - ARP : Découverte des adresses MAC
+     - STP : Topologie des switches
+     - SSDP : Découverte des services UPnP
+     - CDP : Découverte des équipements Cisco
+     - LLDP : Découverte des équipements réseau
+     - WOL : Détection des paquets Wake-on-LAN
+     - ICMP : Détection des pings et traceroutes
+     - SNMP : Informations SNMP
 
-1. **Build the Project from source**:
-  ```sh
-  mkdir build
-  cd build
-  cmake ..
-  make
-  ```
+3. **HostManager** (`Hosts/`)
+   - Gestion des informations sur les hôtes découverts
+   - Stockage dans une base de données MySQL
+   - Export des données au format JSON
 
-2. **Run the Application using docker-compose**:
-  ```sh
-  docker-compose up
-  ```
+### Module Actif (Python)
 
-### Documentation
+Le module actif (`active/`) effectue des scans réseau et des requêtes SNMP pour compléter les informations obtenues passivement.
 
-- **[Process of the Application](docs/process.md)**: Overview of the application components and process flow.
+### Base de données
 
-- **[Adding a New Analyzer](docs/analyzers.md)**: Instructions for adding a new analyzer to the application.
+MySQL est utilisé pour stocker :
+- Les hôtes découverts
+- Les informations de topologie
+- Les services détectés
+- Les données SNMP
 
-For more information, visit the [GitHub repository](https://github.com/an0n1mity/cartographie-passive).
+### Visualisation
+
+Grafana est utilisé pour visualiser :
+- La carte du réseau
+- Les statistiques des hôtes
+- L'évolution de la découverte
+- Les métriques de performance
+
+## Flux de données
+
+1. Capture des paquets (CaptureManager)
+2. Distribution aux analyseurs appropriés
+3. Analyse et extraction des informations
+4. Stockage dans la base de données
+5. Enrichissement par le module actif
+6. Visualisation dans Grafana
+
+## Gestion des signaux
+
+Le programme gère plusieurs signaux :
+- SIGUSR1 : Déclenche l'export des données des hôtes
+- SIGINT/SIGTERM : Arrêt propre du programme
+
+## Variables d'environnement
+
+- `INTERFACE` : Interface réseau à surveiller
+- `TIMEOUT` : Durée de capture (-1 pour illimité)
+- Variables de base de données (DB_HOST, DB_PORT, etc.)
+
+## Performance et scalabilité
+
+- Utilisation de threads pour la capture et l'analyse
+- Gestion asynchrone des signaux avec Boost.Asio
+- Optimisation de la capture avec PcapPlusPlus

@@ -1,101 +1,186 @@
-# NetProbe
+# NetProbe - Solution de Cartographie Réseau
 
-**NetProbe** is a network mapping application designed to passively capture and analyze network traffic. The application utilizes various protocol analyzers to gather information about devices and their interactions on the network.
+![Logo NetProbe](Logo-NetProbe.webp)
 
-## Features
+## Description
 
-- **Packet Capture**: Captures network packets using the PcapPlusPlus library.
-- **Protocol Analysis**: Supports analysis for multiple protocols including ARP, DHCP, STP, and more.
-- **Host Management**: Maintains a database of hosts and updates their information based on captured packets.
-- **Signal Handling**: Dumps host information to a file upon receiving specific signals.
+NetProbe est une solution complète de cartographie réseau qui combine deux approches complémentaires :
+- **Cartographie Passive** : Capture et analyse du trafic réseau en temps réel
+- **Cartographie Active** : Scan actif du réseau pour découvrir et analyser les équipements
 
-## Components
+## Table des matières
 
-- **CaptureManager**: Manages packet capture and distribution to analyzers.
-- **Analyzers**: Abstract base class for analyzing network packets. Derived classes implement specific protocol analysis.
-- **HostManager**: Manages host information and updates the JSON representation of hosts.
+1. [Fonctionnalités](#fonctionnalités)
+2. [Architecture](#architecture)
+3. [Prérequis](#prérequis)
+4. [Installation](#installation)
+5. [Utilisation](#utilisation)
+6. [Configuration](#configuration)
+7. [Documentation Technique](#documentation-technique)
 
-## Getting Started with Script
+## Fonctionnalités
 
-### Prerequisites
-- Docker and docker-compose
-- python and pip
-- iptables or ufw
+### Cartographie Passive
+- Capture de paquets réseau en temps réel
+- Analyse multi-protocoles (ARP, DHCP, STP, etc.)
+- Détection automatique des hôtes
+- Stockage des informations dans une base de données MySQL
+- Visualisation des données via Grafana
+- Export des données au format JSON
 
-### Packet need to install 
-- snmp need to have a resolver of OID: 
-```sh 
+### Cartographie Active
+- Scan réseau actif
+- Détection des services et ports ouverts
+- Analyse SNMP
+- Identification des systèmes d'exploitation
+- Intégration avec la base de données commune
+
+## Architecture
+
+Le projet est composé de plusieurs conteneurs Docker :
+- **netprobe** : Module de cartographie passive
+- **active** : Module de cartographie active
+- **mysql** : Base de données
+- **grafana** : Interface de visualisation
+
+## Prérequis
+
+- Docker et docker-compose
+- Python 3.x et pip
+- iptables ou ufw
+- Accès root/sudo
+
+### Paquets système requis
+
+Installation du resolver OID pour SNMP :
+```bash
 sudo apt-install snmp-mibs-downloader
 sudo sed -i 's/^mibs/#mibs/' /etc/snmp/snmp.conf
-sudo downloader-mibs
+sudo download-mibs
 ```
 
-### Starting Project
-1. Clone the repository:
-    ```sh
-    git clone https://github.com/an0n1mity/cartographie-passive.git
-    cd cartographie-passive
-    ```
-    
-2. Start the script NetProbe.sh:
-    ```sh
-    sudo bash NetProbe.sh
-    ```
-    Sudo  is requierd since we edit firewall rules
+## Installation
 
-3. Press 'n' to start NetProbe
+1. Cloner le dépôt :
+```bash
+git clone https://github.com/julien-lair/netprobe
+cd netprobe
+```
 
-## Getting Started Manually
+2. Préparation de l'environnement :
+```bash
+# Configurer les volumes pour Grafana
+sudo chown -R 472:472 ./grafana_data/grafana-storage
+```
 
-### Prerequisites
+3. Construction et lancement des conteneurs :
+```bash
+sudo docker-compose up --build
+```
 
-- CMake 3.5.0 or higher
-- Docker
+Cette commande va :
+- Construire l'image Docker pour le module passif
+- Construire l'image Docker pour le module actif
+- Démarrer tous les services (netprobe, active, mysql, grafana)
+
+## Utilisation
+
+### Accès aux interfaces
+
+- **Grafana** : http://localhost:3000
+  - Utilisateur : admin
+  - Mot de passe : netprobe
+
+### Commandes utiles
+
+- Voir les logs de la cartographie passive :
+```bash
+docker logs -f netprobe
+```
+
+- Voir les logs de la cartographie active :
+```bash
+docker logs -f active
+```
+
+- Arrêter tous les services :
+```bash
+sudo docker-compose down
+```
+
+- Redémarrer un service spécifique :
+```bash
+sudo docker-compose restart [service_name]
+```
+Où [service_name] peut être : netprobe, active, mysql, ou grafana
+
+## Configuration
+
+### Variables d'environnement
+
+#### Module Passif (netprobe)
+- `INTERFACE` : Interface réseau à surveiller
+- `TIMEOUT` : Durée de capture (-1 pour illimité)
+- `DB_HOST` : Hôte MySQL
+- `DB_PORT` : Port MySQL
+- `DB_USER` : Utilisateur MySQL
+- `DB_PASSWORD` : Mot de passe MySQL
+- `DB_NAME` : Nom de la base de données
+
+#### Module Actif
+- Mêmes variables de base de données que le module passif
+
+### Configuration de la base de données
+
+La base de données MySQL est automatiquement configurée avec :
+- Base : netprobe_db
+- Utilisateur : netprobe
+- Mot de passe : netprobe
+
+## Documentation Technique
+
+### Structure du projet
+
+```
+.
+├── active/                 # Module de cartographie active
+│   ├── Dockerfile
+│   ├── main.py
+│   └── requirements.txt
+├── Analyzers/             # Analyseurs de protocoles
+├── build/                 # Fichiers de compilation
+├── docs/                  # Documentation détaillée
+├── Layers/                # Définition des couches réseau
+├── Scripts/              # Scripts utilitaires
+└── docker-compose.yml    # Configuration des conteneurs
+```
+
+### Développement
+
+#### Compilation depuis les sources
+
+1. Prérequis de développement :
+- CMake 3.5.0 ou supérieur
 - PcapPlusPlus
 - Boost
 - JSONCPP
 
-### Build the Project from Source
+2. Compilation :
+```bash
+mkdir build
+cd build
+cmake ..
+make
+```
 
-1. Clone the repository:
-    ```sh
-    git clone https://github.com/an0n1mity/cartographie-passive.git
-    cd cartographie-passive
-    ```
+### Ajout d'un nouvel analyseur
 
-2. Create a build directory and navigate into it:
-    ```sh
-    mkdir build
-    cd build
-    ```
+Pour ajouter un nouvel analyseur de protocole :
+1. Créer une nouvelle classe dans le dossier `Analyzers/`
+2. Hériter de la classe de base `Analyzer`
+3. Implémenter les méthodes requises
+4. Enregistrer l'analyseur dans le gestionnaire de capture
 
-3. Run CMake to configure the project:
-    ```sh
-    cmake ..
-    ```
+## Licence
 
-4. Build the project:
-    ```sh
-    make
-    ```
-
-### Run the Application using Docker Compose
-
-1. Ensure Docker is installed and running on your system.
-
-2. Use Docker Compose to build and run the application:
-    ```sh
-    docker-compose up
-    ```
-
-## Documentation
-
-- **[Process of the Application](docs/process.md)**: Overview of the application components and process flow.
-
-- **[Adding a New Analyzer](docs/analyzers.md)**: Instructions for adding a new analyzer to the application.
-
-For more information, visit the [GitHub repository](https://github.com/an0n1mity/cartographie-passive).
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.

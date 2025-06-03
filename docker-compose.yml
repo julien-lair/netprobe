@@ -82,6 +82,13 @@ services:
     privileged: true
     entrypoint: ["/entrypoint.sh"]
 
+  # Adminer est un outil de gestion de base de données avec interface web
+  # Il permet de :
+  # - Se connecter et administrer la base MySQL
+  # - Visualiser/modifier les tables et données
+  # - Exécuter des requêtes SQL
+  # - Importer/exporter des données
+  # Le service est accessible sur http://localhost:8080
   # adminer:
   #     image: adminer
   #     restart: always
