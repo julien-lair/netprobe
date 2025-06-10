@@ -107,6 +107,8 @@ Cette commande va :
   #### 3 - Partie Active
   Dans cette section, vous pouvez lancer différents types de scans :
 
+  **⚠️ Modifier la variable addresse IP active** : utilisez localhost si vous accédez à la cartographie depuis le même PC que celui qui l’héberge, ou bien l’adresse IP du serveur (ex. 10.105.xx.xx) si vous y accédez depuis un autre appareil sur le réseau.
+  
 - **ARP :** les IP inconnues détectées par la partie passive peuvent être interrogées.
 - **mDNS :** lancez un scan mDNS pour découvrir les appareils de votre réseau (caméras, imprimantes, services SSH, etc.).
 - **SNMP** (IP unique ou /24) : lancez un scan SNMP sur une IP précise ou une plage en /24 pour obtenir des informations sur les appareils.

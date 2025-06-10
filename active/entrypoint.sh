@@ -1,28 +1,28 @@
 #!/bin/bash
-
 set -e
 
-# Nettoyer le fichier de PID D-Bus s’il est orphelin
-if [ -f /run/dbus/pid ] && ! pgrep -x "dbus-daemon" > /dev/null; then
-    echo "Fichier PID D-Bus présent sans processus, suppression..."
-    rm -f /run/dbus/pid
-fi
+# Nettoyer les PID orphelins
+[ -f /run/dbus/pid ] && ! pgrep -x "dbus-daemon" > /dev/null && rm -f /run/dbus/pid
+[ -f /run/avahi-daemon/pid ] && ! pgrep -x "avahi-daemon" > /dev/null && rm -f /run/avahi-daemon/pid
 
-# Démarrer D-Bus
-mkdir -p /var/run/dbus
-dbus-daemon --system --fork
+# Préparer les répertoires
+mkdir -p /run/dbus /run/avahi-daemon
+
+# Lancer dbus-daemon
+echo "Lancement de dbus-daemon..."
+dbus-daemon --system &
 
 # Attendre que D-Bus soit prêt
 sleep 1
 
-# Démarrer Avahi
-avahi-daemon --daemonize --no-chroot
-
-# Vérifier si avahi-daemon a bien démarré
-if ! pgrep -x "avahi-daemon" > /dev/null; then
-    echo "Erreur : avahi-daemon n’a pas démarré."
-    exit 1
+# Vérifier si avahi-daemon est déjà en cours (à cause du mode host)
+if pgrep -x "avahi-daemon" > /dev/null; then
+    echo "avahi-daemon déjà en cours, on ne relance pas."
+else
+    echo "Lancement de avahi-daemon..."
+    avahi-daemon --daemonize --no-chroot
 fi
 
-# Lancer ton app
+# Lancer l’application
+echo "Lancement de l’application Python..."
 exec python main.py
