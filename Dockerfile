@@ -18,7 +18,8 @@ RUN apk add --no-cache \
     mariadb-connector-c-dev \
     mariadb-dev \
     mysql-client \
-    mariadb-connector-c
+    mariadb-connector-c \
+    curl-dev
 
 # Installation de la glibc (certains outils l'exigent)
 RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
@@ -71,7 +72,8 @@ RUN mkdir build \
         python3 \
         py3-pip \
         mariadb-connector-c \
-        mysql-client
+        mysql-client \
+        curl
     
     # Installation de la glibc pour l'exécution correcte de certains outils
     RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \

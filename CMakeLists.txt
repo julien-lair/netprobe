@@ -4,6 +4,7 @@ project(netprobe VERSION 0.1.0 LANGUAGES C CXX)
 # Trouver les dépendances
 find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED)
+find_package(CURL REQUIRED)
 
 # Configurer MySQL différemment
 find_path(MYSQL_INCLUDE_DIR mysql.h
@@ -74,4 +75,5 @@ target_link_libraries(netprobe
     pthread
     ${Boost_LIBRARIES}
     ${MYSQL_LIBRARIES}
+    CURL::libcurl
 )

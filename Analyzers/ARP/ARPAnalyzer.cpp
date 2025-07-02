@@ -26,7 +26,7 @@ void ARPAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
     }
     
     // Update the host manager with the ARP data
-    auto arpData = std::make_unique<ARPData>(ts, srcMac, srcIp, dstIp);
+    auto arpData = std::make_unique<ARPData>(ts, srcMac, srcIp, dstIp, parsedPacket);
     
     #ifdef DEBUG
     std::cout << "ARP Data:" << std::endl;

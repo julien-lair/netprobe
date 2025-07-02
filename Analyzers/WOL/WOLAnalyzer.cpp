@@ -25,7 +25,7 @@ void WOLAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
     }
     
     // Create a WOLData object
-    auto wolData = std::make_unique<WOLData>(ts, sourceMacAddr, targetMacAddrStr);
+    auto wolData = std::make_unique<WOLData>(ts, sourceMacAddr, targetMacAddrStr, parsedPacket);
     
     #ifdef DEBUG
     std::cout << "WOL Data:" << std::endl;

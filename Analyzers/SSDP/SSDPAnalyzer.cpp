@@ -72,7 +72,7 @@ void SSDPAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
     if (clientIP.empty() || clientMAC.empty()) {
         return; // Invalid IP or MAC, exit the function
     }
-    auto ssdpData = std::make_unique<SSDPData>(parsedPacket.getRawPacket()->getPacketTimeStamp(), pcpp::MacAddress(clientMAC), pcpp::IPv4Address(clientIP), ssdpLayer.getSSDPType(), ssdpLayer.getSSDPHeaders());
+    auto ssdpData = std::make_unique<SSDPData>(parsedPacket.getRawPacket()->getPacketTimeStamp(), pcpp::MacAddress(clientMAC), pcpp::IPv4Address(clientIP), ssdpLayer.getSSDPType(), ssdpLayer.getSSDPHeaders(),parsedPacket);
     
     #ifdef DEBUG
     std::cout << "SSDP Data:" << std::endl;

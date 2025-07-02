@@ -111,7 +111,7 @@ void DHCPAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
         return; // Invalid MAC or IP, exit the function
     }
     
-    auto dhcpData = std::make_unique<DHCPData>(ts, clientMac, ipAddress, hostname, dhcpServerIp, gatewayIp, dnsServerIp, fingerPrint, messageType);
+    auto dhcpData = std::make_unique<DHCPData>(ts, clientMac, ipAddress, hostname, dhcpServerIp, gatewayIp, dnsServerIp, fingerPrint, messageType, parsedPacket);
     
     #ifdef DEBUG
     std::cout << "DHCP Packet:" << std::endl;

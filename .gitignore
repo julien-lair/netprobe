@@ -5,3 +5,9 @@ docs/latex
 latex/
 Output/
 sortie
+*.csv
+*.pkl
+IDS/__pycache__/
+IDS/*.pyc
+IDS/venv/
+IDS/env/

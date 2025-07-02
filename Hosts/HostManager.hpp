@@ -70,6 +70,7 @@ public:
     void updateHost(ProtocolType protocol, std::unique_ptr<ProtocolData> data);
 
     void updateHostSqlite(pcpp::MacAddress mac, pcpp::IPAddress ip, const std::string& hostname,ProtocolType protocol, const std::unique_ptr<ProtocolData>& data,const std::string& OS_Supposition);
+    void sendToDataset(pcpp::MacAddress mac, pcpp::IPAddress ip, const std::string& hostname,ProtocolType protocol, const std::unique_ptr<ProtocolData>& data,const std::string& OS_Supposition);
 private:
   static std::mutex mysqlMutex;
     static MYSQL* mysql_conn;

@@ -82,7 +82,16 @@ services:
       - NET_ADMIN
     privileged: true
     entrypoint: ["/entrypoint.sh"]
-
+  ids:
+      build:
+        context: ./IDS
+        dockerfile: Dockerfile
+      container_name: ids
+      ports:
+        - "5002:5002"
+      volumes:
+        - ./IDS:/app
+      restart: unless-stopped
   # Adminer est un outil de gestion de base de données avec interface web
   # Il permet de :
   # - Se connecter et administrer la base MySQL

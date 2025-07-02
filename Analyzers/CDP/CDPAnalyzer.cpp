@@ -57,7 +57,7 @@ void CDPAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
         return; // Invalid MAC
     }
     
-    auto cdpData = std::make_unique<CDPData>(ts, srcMac, cdpLayer);
+    auto cdpData = std::make_unique<CDPData>(ts, srcMac, cdpLayer, parsedPacket);
     
     #ifdef DEBUG
     std::cout << "CDP Data:" << std::endl;

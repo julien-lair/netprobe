@@ -42,7 +42,7 @@ void mDNSAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
                 
                 pcpp::RawPacket* rawPacket = parsedPacket.getRawPacket();
                 timespec ts = rawPacket->getPacketTimeStamp();  
-                auto mdnsData = std::make_unique<mDNSData>(ts, queriedDomain, srcMac, hostname, ipAddress, "DNS_TYPE_A");
+                auto mdnsData = std::make_unique<mDNSData>(ts, queriedDomain, srcMac, hostname, ipAddress, "DNS_TYPE_A", parsedPacket);
                 hostManager.updateHost(ProtocolType::MDNS, std::move(mdnsData));
                 #ifdef DEBUG
                 std::cout << "mDNS A record detected" << std::endl;
@@ -56,7 +56,7 @@ void mDNSAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
 
                 pcpp::RawPacket* rawPacket = parsedPacket.getRawPacket();
                 timespec ts = rawPacket->getPacketTimeStamp();  
-                auto mdnsData = std::make_unique<mDNSData>(ts, "", srcMac, hostname, pcpp::IPAddress("0.0.0.0"), "DNS_TYPE_PTR");
+                auto mdnsData = std::make_unique<mDNSData>(ts, "", srcMac, hostname, pcpp::IPAddress("0.0.0.0"), "DNS_TYPE_PTR", parsedPacket);
 
                 hostManager.updateHost(ProtocolType::MDNS, std::move(mdnsData));
                 #ifdef DEBUG

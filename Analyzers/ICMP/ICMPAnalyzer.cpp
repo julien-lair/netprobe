@@ -35,7 +35,7 @@ void ICMPAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
         srcIp.isZero() || dstIp.isZero()){    
         return; // Invalid MAC or IP, exit the function
     }
-    auto icmpData = std::make_unique<ICMPData>(ts, srcMac, srcIp, dstMac, dstIp, type);
+    auto icmpData = std::make_unique<ICMPData>(ts, srcMac, srcIp, dstMac, dstIp, type, parsedPacket);
 
     #ifdef DEBUG
     std::cout << "ICMP Data:" << std::endl;

@@ -106,7 +106,7 @@ void SNMPAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
             //std::cerr << "Invalid IP address!" << std::endl;
             return;
         }
-        auto snmpData = std::make_unique<SNMPData>(ts, senderMac, senderIpStr, targetMac, targetIpStr, typeStr, communityName, oidStr,oidNameStr,oidValueStr, versionStr, errorStatusStr);
+        auto snmpData = std::make_unique<SNMPData>(ts, senderMac, senderIpStr, targetMac, targetIpStr, typeStr, communityName, oidStr,oidNameStr,oidValueStr, versionStr, errorStatusStr, parsedPacket);
 
         #ifdef DEBUG
         std::cout << "SNMP Data:" << std::endl;

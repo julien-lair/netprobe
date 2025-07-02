@@ -7,8 +7,10 @@
 #include <mysql/mysql.h>
 #include "Host.hpp"
 #include <mutex>
-
-
+#include <curl/curl.h>
+#include <sstream>  
+#include <TcpLayer.h>
+#include <UdpLayer.h>
 
 std::mutex HostManager::mysqlMutex;
 MYSQL* HostManager::mysql_conn = nullptr;
@@ -80,13 +82,39 @@ HostManager::~HostManager() {
         mysql_conn = nullptr;
     }
 }
-
+std::string protocolToString(ProtocolType type) {
+    switch (type) {
+        case ProtocolType::DHCP:
+            return "DHCP";
+        case ProtocolType::ARP:
+            return "ARP";
+        case ProtocolType::STP:
+            return "STP";
+        case ProtocolType::LLDP:
+            return "LLDP";
+        case ProtocolType::SSDP:
+            return "SSDP";
+        case ProtocolType::CDP:
+            return "CDP";
+        case ProtocolType::WOL:
+            return "WOL";
+        case ProtocolType::ICMP:
+            return "ICMP";
+        case ProtocolType::SNMP:
+            return "SNMP";
+        case ProtocolType::MDNS:
+            return "mDNS";
+        default:
+            return "UNKNOWN";
+    }
+}
 
 void HostManager::updateHost(ProtocolType protocol, std::unique_ptr<ProtocolData> data) {
     timespec first_seen, last_seen;
 
     auto processHost = [&](pcpp::MacAddress mac, pcpp::IPAddress ip, const std::string& hostname, ProtocolType type, const std::string& OS_Supposition = "") {
         updateHostSqlite(mac,ip,hostname,type,data, OS_Supposition );
+        sendToDataset(mac,ip,hostname,type,data, OS_Supposition);
     };
 
     switch (protocol) {
@@ -169,34 +197,75 @@ void HostManager::updateHost(ProtocolType protocol, std::unique_ptr<ProtocolData
     
     }
 }
-
-std::string protocolToString(ProtocolType type) {
-    switch (type) {
-        case ProtocolType::DHCP:
-            return "DHCP";
-        case ProtocolType::ARP:
-            return "ARP";
-        case ProtocolType::STP:
-            return "STP";
-        case ProtocolType::LLDP:
-            return "LLDP";
-        case ProtocolType::SSDP:
-            return "SSDP";
-        case ProtocolType::CDP:
-            return "CDP";
-        case ProtocolType::WOL:
-            return "WOL";
-        case ProtocolType::ICMP:
-            return "ICMP";
-        case ProtocolType::SNMP:
-            return "SNMP";
-        case ProtocolType::MDNS:
-            return "mDNS";
-        default:
-            return "UNKNOWN";
-    }
+size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp)
+{
+    size_t totalSize = size * nmemb;
+    std::string* response = static_cast<std::string*>(userp);
+    response->append((char*)contents, totalSize);
+    return totalSize;
 }
 
+void HostManager::sendToDataset(pcpp::MacAddress mac, pcpp::IPAddress ip, const std::string& hostname,ProtocolType protocol, const std::unique_ptr<ProtocolData>& data, const std::string& OS_Supposition) {
+    std::stringstream json;
+    uint16_t srcPort = 0;
+    uint16_t dstPort = 0;
+    int packetSize = 0;
+    Json::Value jsonData;
+    if (pcpp::Packet* packet = data->getPacket()) {
+        if (packet->getRawPacketReadOnly() != nullptr) {
+            packetSize = packet->getRawPacketReadOnly()->getRawDataLen();
+        }
+        jsonData = data->toJson();
+        if (packet->isPacketOfType(pcpp::TCP)) {
+            pcpp::TcpLayer* tcpLayer = packet->getLayerOfType<pcpp::TcpLayer>();
+            if (tcpLayer != nullptr) {
+                srcPort = tcpLayer->getSrcPort();
+                dstPort = tcpLayer->getDstPort();
+            }
+        } else if (packet->isPacketOfType(pcpp::UDP)) {
+            pcpp::UdpLayer* udpLayer = packet->getLayerOfType<pcpp::UdpLayer>();
+            if (udpLayer != nullptr) {
+                srcPort = udpLayer->getSrcPort();
+                dstPort = udpLayer->getDstPort();
+            }
+        }
+    }
+
+    // Convertir jsonData en string proprement, même si c’est vide
+    Json::StreamWriterBuilder writer;
+    writer["indentation"] = ""; // pour éviter les retours à la ligne
+    std::string jsonDataStr = Json::writeString(writer, jsonData);
+       
+            json << R"({"protocol":")" << protocolToString(protocol) << R"(",)"
+                << R"("mac":")" << mac.toString() << R"(",)"
+                << R"("ip":")" << ip.toString() << R"(",)"
+                << R"("port_src":)" << srcPort << ","
+                << R"("port_dst":)" << dstPort << ","
+                << R"("taille":)" << packetSize << ","
+                << R"("data_protocol":)" << jsonDataStr << "}";
+
+        CURL* curl = curl_easy_init();
+        if (curl) {
+        std::string response_string;
+
+        struct curl_slist* headers = nullptr;
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+        std::string jsonStr = json.str();
+
+        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5002/analyse");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonStr.c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        //curl_easy_setopt(curl, CURLOPT_TIMEOUT, 1L);
+
+        // Setup callback pour récupérer la réponse
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_string);
+
+        CURLcode res = curl_easy_perform(curl);
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+    }
+}
 void HostManager::updateHostSqlite(pcpp::MacAddress mac, pcpp::IPAddress ip, const std::string& hostname,ProtocolType protocol, const std::unique_ptr<ProtocolData>& data, const std::string& OS_Supposition) {
     
     if (!mysql_conn) return;

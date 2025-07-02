@@ -39,7 +39,7 @@ void STPAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
     if (srcMac == pcpp::MacAddress::Zero) {
         return; // Invalid MAC
     }
-    auto stpData = std::make_unique<STPData>(ts, srcMac, rootIdentifier, bridgeIdentifier);
+    auto stpData = std::make_unique<STPData>(ts, srcMac, rootIdentifier, bridgeIdentifier,parsedPacket);
     
     #ifdef DEBUG
     std::cout << "STP Data:" << std::endl;

@@ -10,7 +10,9 @@
 #include <ctime>
 #include <unordered_set>
 #include <json/json.h>
-
+#include "PcapLiveDeviceList.h"
+#include "PcapLiveDevice.h"
+#include "Packet.h"
 enum class ProtocolType {
     DHCP,
     MDNS,
@@ -93,6 +95,7 @@ struct ProtocolData {
         jsonData["TIMESTAMP"] = std::to_string(timestamp.tv_sec) + "." + std::to_string(timestamp.tv_nsec); 
         return jsonData;
     }
+    virtual pcpp::Packet* getPacket() const { return nullptr; }
 };
 
 // Data structure for DHCP protocol
@@ -113,12 +116,12 @@ struct DHCPData : public ProtocolData {
     pcpp::IPAddress dnsServerIp;
     std::string fingerPrint;
     std::string messageType;
-
+    pcpp::Packet packet;
      // Constructor
     DHCPData(timespec ts, pcpp::MacAddress mac, pcpp::IPAddress ip, const std::string& host,
-             pcpp::IPAddress dhcpServer, pcpp::IPAddress gateway, pcpp::IPAddress dns, std::string& OS_Supposition, std::string& DHCP_type)
+             pcpp::IPAddress dhcpServer, pcpp::IPAddress gateway, pcpp::IPAddress dns, std::string& OS_Supposition, std::string& DHCP_type, pcpp::Packet& parsedPacket)
         : ProtocolData(ProtocolType::DHCP, ts), clientMac(mac), ipAddress(ip),
-          hostname(host), dhcpServerIp(dhcpServer), gatewayIp(gateway), dnsServerIp(dns), fingerPrint(OS_Supposition), messageType(DHCP_type) {}
+          hostname(host), dhcpServerIp(dhcpServer), gatewayIp(gateway), dnsServerIp(dns), fingerPrint(OS_Supposition), messageType(DHCP_type), packet(parsedPacket) {}
 
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
@@ -134,6 +137,8 @@ struct DHCPData : public ProtocolData {
 
         return jsonData;
     }
+    pcpp::Packet* getPacket() const override { return const_cast<pcpp::Packet*>(&packet); }
+
 };
 
 // Data structure for mDNS protocol
@@ -151,9 +156,10 @@ struct mDNSData : public ProtocolData {
     std::string hostname;
     pcpp::IPAddress ipAddress;
     std::string typeDNS;
+    pcpp::Packet packet;
     // Constructor
-    mDNSData(timespec ts, const std::string& domain, pcpp::MacAddress mac, const std::string& host, pcpp::IPAddress ip, const std::string& type)
-        : ProtocolData(ProtocolType::MDNS, ts), queriedDomain(domain), clientMac(mac), hostname(host), ipAddress(ip), typeDNS(type) { }
+    mDNSData(timespec ts, const std::string& domain, pcpp::MacAddress mac, const std::string& host, pcpp::IPAddress ip, const std::string& type, pcpp::Packet& parsedPacket)
+        : ProtocolData(ProtocolType::MDNS, ts), queriedDomain(domain), clientMac(mac), hostname(host), ipAddress(ip), typeDNS(type), packet(parsedPacket) { }
 
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
@@ -166,6 +172,8 @@ struct mDNSData : public ProtocolData {
 
         return jsonData;
     }
+    pcpp::Packet* getPacket() const override { return const_cast<pcpp::Packet*>(&packet); }
+
 };
 
 // Data structure for ARP protocol
@@ -180,10 +188,11 @@ struct ARPData : public ProtocolData {
     pcpp::MacAddress senderMac;
     pcpp::IPAddress senderIp;
     pcpp::IPAddress targetIp; 
+    pcpp::Packet packet;
 
     // Constructor
-    ARPData(timespec ts, pcpp::MacAddress mac, pcpp::IPAddress sender, pcpp::IPAddress target)
-        : ProtocolData(ProtocolType::ARP, ts), senderMac(mac), senderIp(sender), targetIp(target) {}
+    ARPData(timespec ts, pcpp::MacAddress mac, pcpp::IPAddress sender, pcpp::IPAddress target, pcpp::Packet& parsedPacket)
+        : ProtocolData(ProtocolType::ARP, ts), senderMac(mac), senderIp(sender), targetIp(target), packet(parsedPacket) {}
 
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
@@ -194,6 +203,8 @@ struct ARPData : public ProtocolData {
 
         return jsonData;
     }
+    pcpp::Packet* getPacket() const override { return const_cast<pcpp::Packet*>(&packet); }
+
 };
 
 // Data structure for LLDP protocol
@@ -212,9 +223,10 @@ struct LLDPData : public ProtocolData {
     std::string portDescription;
     std::string systemName;
     std::string systemDescription;
+    pcpp::Packet packet;
 
-    LLDPData(timespec ts, pcpp::MacAddress mac, std::string port, std::string portDesc, std::string sysName, std::string sysDesc)
-        : ProtocolData(ProtocolType::LLDP, ts), senderMAC(mac), portID(port), portDescription(portDesc), systemName(sysName), systemDescription(sysDesc) {}
+    LLDPData(timespec ts, pcpp::MacAddress mac, std::string port, std::string portDesc, std::string sysName, std::string sysDesc, pcpp::Packet& parsedPacket)
+        : ProtocolData(ProtocolType::LLDP, ts), senderMAC(mac), portID(port), portDescription(portDesc), systemName(sysName), systemDescription(sysDesc), packet(parsedPacket) {}
 
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
@@ -227,6 +239,8 @@ struct LLDPData : public ProtocolData {
 
         return jsonData;
     }
+    pcpp::Packet* getPacket() const override { return const_cast<pcpp::Packet*>(&packet); }
+
 };
 
 // Data structure for STP protocol
@@ -241,13 +255,15 @@ struct STPData : public ProtocolData {
     pcpp::MacAddress senderMAC;
     STPLayer::RootIdentifier rootIdentifier;
     STPLayer::BridgeIdentifier bridgeIdentifier;
+    pcpp::Packet packet;
 
     // Modified constructor to take an STPLayer object directly
-    STPData(timespec ts, pcpp::MacAddress mac, STPLayer::RootIdentifier rootId, STPLayer::BridgeIdentifier bridgeId)
+    STPData(timespec ts, pcpp::MacAddress mac, STPLayer::RootIdentifier rootId, STPLayer::BridgeIdentifier bridgeId, pcpp::Packet& parsedPacket)
         : ProtocolData(ProtocolType::STP, ts),
             senderMAC(mac),  // Initialize from parameter
             rootIdentifier(rootId),  // Initialize from parameter
-            bridgeIdentifier(bridgeId) {}  // Initialize from parameter
+            bridgeIdentifier(bridgeId),
+            packet(parsedPacket) {}  // Initialize from parameter
     
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
@@ -262,6 +278,8 @@ struct STPData : public ProtocolData {
 
         return jsonData;
     }
+    pcpp::Packet* getPacket() const override { return const_cast<pcpp::Packet*>(&packet); }
+
 };
 
 // Data structure for SSDP protocol
@@ -279,9 +297,10 @@ struct SSDPData : public ProtocolData {
 
     SSDPLayer::SSDPType ssdpType;
     std::vector<std::pair<std::string, std::string>> ssdpHeaders;
+    pcpp::Packet packet;
 
-    SSDPData(timespec ts, pcpp::MacAddress mac, pcpp::IPv4Address ip, SSDPLayer::SSDPType type, std::vector<std::pair<std::string, std::string>> headers)
-        : ProtocolData(ProtocolType::SSDP, ts), senderMAC(mac), senderIP(ip), ssdpType(type), ssdpHeaders(headers) {}
+    SSDPData(timespec ts, pcpp::MacAddress mac, pcpp::IPv4Address ip, SSDPLayer::SSDPType type, std::vector<std::pair<std::string, std::string>> headers, pcpp::Packet& parsedPacket)
+        : ProtocolData(ProtocolType::SSDP, ts), senderMAC(mac), senderIP(ip), ssdpType(type), ssdpHeaders(headers), packet(parsedPacket) {}
 
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
@@ -298,6 +317,8 @@ struct SSDPData : public ProtocolData {
 
         return jsonData;
     }
+    pcpp::Packet* getPacket() const override { return const_cast<pcpp::Packet*>(&packet); }
+
 };
 
 // Data structure for CDP protocol
@@ -326,9 +347,10 @@ struct CDPData : public ProtocolData {
     uint8_t trustBitmap;
     uint8_t untrustedPortCos;
     CDPLayer::Addresses mgmtAddresses;
+    pcpp::Packet packet;
 
-    CDPData(timespec ts, pcpp::MacAddress mac, CDPLayer cdpLayer)
-        : ProtocolData(ProtocolType::CDP, ts), senderMAC(mac), deviceId(cdpLayer.getDeviceId()), addresses(cdpLayer.getAddresses()), portId(cdpLayer.getPortId()), capabilities(cdpLayer.getCapabilities()), capabilitiesStr(cdpLayer.capabilitiesToString(cdpLayer.getCapabilities())), softwareVersion(cdpLayer.getSoftwareVersion()), platform(cdpLayer.getPlatform()), vtpManagementDomain(cdpLayer.getVTPManagementDomain()), nativeVlan(cdpLayer.getNativeVlan()), duplex(cdpLayer.getDuplex()), trustBitmap(cdpLayer.getTrustBitmap()), untrustedPortCos(cdpLayer.getUntrustedPortCos()), mgmtAddresses(cdpLayer.getMgmtAddresses()) {}
+    CDPData(timespec ts, pcpp::MacAddress mac, CDPLayer cdpLayer, pcpp::Packet& parsedPacket)
+        : ProtocolData(ProtocolType::CDP, ts), senderMAC(mac), deviceId(cdpLayer.getDeviceId()), addresses(cdpLayer.getAddresses()), portId(cdpLayer.getPortId()), capabilities(cdpLayer.getCapabilities()), capabilitiesStr(cdpLayer.capabilitiesToString(cdpLayer.getCapabilities())), softwareVersion(cdpLayer.getSoftwareVersion()), platform(cdpLayer.getPlatform()), vtpManagementDomain(cdpLayer.getVTPManagementDomain()), nativeVlan(cdpLayer.getNativeVlan()), duplex(cdpLayer.getDuplex()), trustBitmap(cdpLayer.getTrustBitmap()), untrustedPortCos(cdpLayer.getUntrustedPortCos()), mgmtAddresses(cdpLayer.getMgmtAddresses()), packet(parsedPacket) {}
 
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
@@ -381,6 +403,8 @@ struct CDPData : public ProtocolData {
         }
         return addressStr;
     }
+    pcpp::Packet* getPacket() const override { return const_cast<pcpp::Packet*>(&packet); }
+
 };
 
 // Data structure for WOL protocol
@@ -394,9 +418,10 @@ struct CDPData : public ProtocolData {
 struct WOLData : public ProtocolData {
     pcpp::MacAddress senderMAC;
     pcpp::MacAddress targetMAC;
+    pcpp::Packet packet;
 
-    WOLData(timespec ts, pcpp::MacAddress sender, pcpp::MacAddress target)
-        : ProtocolData(ProtocolType::WOL, ts), senderMAC(sender), targetMAC(target) {}
+    WOLData(timespec ts, pcpp::MacAddress sender, pcpp::MacAddress target, pcpp::Packet& parsedPacket)
+        : ProtocolData(ProtocolType::WOL, ts), senderMAC(sender), targetMAC(target), packet(parsedPacket) {}
 
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
@@ -422,9 +447,10 @@ struct WOLData : public ProtocolData {
     pcpp::MacAddress targetMAC; 
     pcpp::IPAddress targetIP; 
     uint8_t type;
+    pcpp::Packet packet;
     // Constructor
-    ICMPData(timespec ts, pcpp::MacAddress mac, pcpp::IPAddress sender, pcpp::MacAddress targetMac, pcpp::IPAddress target, uint8_t icmpType)
-        : ProtocolData(ProtocolType::ICMP, ts), senderMAC(mac), senderIP(sender), targetMAC(targetMac), targetIP(target), type(icmpType) {}
+    ICMPData(timespec ts, pcpp::MacAddress mac, pcpp::IPAddress sender, pcpp::MacAddress targetMac, pcpp::IPAddress target, uint8_t icmpType, pcpp::Packet& parsedPacket)
+        : ProtocolData(ProtocolType::ICMP, ts), senderMAC(mac), senderIP(sender), targetMAC(targetMac), targetIP(target), type(icmpType), packet(parsedPacket) {}
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
 
@@ -436,6 +462,8 @@ struct WOLData : public ProtocolData {
 
         return jsonData;
     }
+    pcpp::Packet* getPacket() const override { return const_cast<pcpp::Packet*>(&packet); }
+
 };
 
 // Data structure for SNMP protocol
@@ -458,9 +486,10 @@ struct SNMPData : public ProtocolData {
     std::string oidValue;
     std::string version;
     std::string errorStatus;
+    pcpp::Packet packet;
     // Constructor
-    SNMPData(timespec ts, pcpp::MacAddress mac, pcpp::IPAddress sender, pcpp::MacAddress targetMac, pcpp::IPAddress target, std::string snmpType, std::string communityName, std::string oid, std::string oidName, std::string oidValue, std::string version, std::string errorStatus)
-        : ProtocolData(ProtocolType::SNMP, ts), senderMAC(mac), senderIP(sender), targetMAC(targetMac), targetIP(target), type(snmpType), communityName(communityName), oid(oid), oidName(oidName), oidValue(oidValue), version(version), errorStatus(errorStatus) {}
+    SNMPData(timespec ts, pcpp::MacAddress mac, pcpp::IPAddress sender, pcpp::MacAddress targetMac, pcpp::IPAddress target, std::string snmpType, std::string communityName, std::string oid, std::string oidName, std::string oidValue, std::string version, std::string errorStatus, pcpp::Packet& parsedPacket)
+        : ProtocolData(ProtocolType::SNMP, ts), senderMAC(mac), senderIP(sender), targetMAC(targetMac), targetIP(target), type(snmpType), communityName(communityName), oid(oid), oidName(oidName), oidValue(oidValue), version(version), errorStatus(errorStatus), packet(parsedPacket) {}
 
     Json::Value toJson() const override {
         Json::Value jsonData = ProtocolData::toJson();  // ajoute les champs de base (timestamp, etc.)
@@ -479,6 +508,8 @@ struct SNMPData : public ProtocolData {
 
         return jsonData;
     }
+    pcpp::Packet* getPacket() const override { return const_cast<pcpp::Packet*>(&packet); }
+
 };
 /**
  * @struct ProtocolDataComparator

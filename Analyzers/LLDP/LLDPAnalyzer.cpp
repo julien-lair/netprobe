@@ -36,7 +36,7 @@ void LLDPAnalyzer::analyzePacket(pcpp::Packet& parsedPacket) {
     if (senderMac == pcpp::MacAddress::Zero || portID.empty() || portDescription.empty() || systemName.empty()) {
         return; // Invalid MAC or IP, exit the function
     }    
-    auto lldpData = std::make_unique<LLDPData>(ts, senderMac, portID, portDescription, systemName, systemDescription);
+    auto lldpData = std::make_unique<LLDPData>(ts, senderMac, portID, portDescription, systemName, systemDescription, parsedPacket);
     
     #ifdef DEBUG
     std::cout << "LLDP Data:" << std::endl;

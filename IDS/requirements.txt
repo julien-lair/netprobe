@@ -1,0 +1,9 @@
+flask
+flask-executor
+pandas
+numpy
+joblib
+scikit-learn
+cachetools
+python-dateutil
+matplotlib
