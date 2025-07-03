@@ -35,6 +35,23 @@ NetProbe est une solution complète de cartographie réseau qui combine deux app
 - Identification des systèmes d'exploitation
 - Intégration avec la base de données commune
 
+### IDS IA (Détection d’Intrusion)
+NetProbe intègre un module IDS (Intrusion Detection System) basé sur l’intelligence artificielle pour renforcer la sécurité réseau.
+
+#### Fonctionnement
+- Module Python (Flask) recevant en temps réel les trames capturées
+- Analyse par pipeline de machine learning (scikit-learn)
+- Détection d’anomalies sur les protocoles : DHCP, ARP, ICMP, LLDP, SNMP, etc.
+- Stockage des trames malveillantes détectées
+#### Objectifs
+- Détecter les comportements suspects : scans, usurpation ARP, DHCP rogue, activité ICMP anormale
+- Identifier les équipements inconnus ou non conformes
+- Générer un historique des anomalies pour investigation
+#### Création des modèles
+- Collecte : Capture continue des trames réseau pendant au moins 7 jours pour constituer un dataset représentatif
+- Entraînement : Génération automatique des modèles ML adaptés à l’environnement réseau réel
+- Mise à jour : Possibilité de réentraîner les modèles pour suivre l’évolution du réseau
+
 ## Architecture
 
 Le projet est composé de plusieurs conteneurs Docker :
@@ -42,6 +59,7 @@ Le projet est composé de plusieurs conteneurs Docker :
 - **active** : Module de cartographie active
 - **mysql** : Base de données
 - **grafana** : Interface de visualisation
+- **IDS** : Intrusion Detection System
 
 ## Prérequis
 
@@ -81,7 +99,7 @@ sudo docker compose up --build
 Cette commande va :
 - Construire l'image Docker pour le module passif
 - Construire l'image Docker pour le module actif
-- Démarrer tous les services (netprobe, active, mysql, grafana)
+- Démarrer tous les services (netprobe, active, mysql, grafana, ids)
 
 ## Utilisation
 
