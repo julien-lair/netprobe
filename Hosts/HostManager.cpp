@@ -252,7 +252,7 @@ void HostManager::sendToDataset(pcpp::MacAddress mac, pcpp::IPAddress ip, const 
         headers = curl_slist_append(headers, "Content-Type: application/json");
         std::string jsonStr = json.str();
 
-        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5002/analyse");
+        curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5002/add_trames");
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonStr.c_str());
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
         //curl_easy_setopt(curl, CURLOPT_TIMEOUT, 1L);

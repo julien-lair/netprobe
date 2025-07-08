@@ -94,7 +94,7 @@ sudo chown -R 472:472 ./grafana_data/grafana-storage
 3. Construction et lancement des conteneurs :
 ```bash
 sudo docker compose up --build
-```
+``` 
 
 Cette commande va :
 - Construire l'image Docker pour le module passif
